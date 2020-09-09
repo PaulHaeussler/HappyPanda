@@ -26,7 +26,7 @@ Static parameters are always preceded with a dash '-', whereas parameter values 
 ### Voluntary parameters:
 
 -   -getAlbum : downloads one specified album with all its metadata, full URL has to be specified
--   -getFavs : downloads all your favorites, and maintains categories
+-   -favs : downloads all your favorites, and maintains categories
 -   -startFrom [ex_id]: resume where you left of, in case quota got met
 -   -nodb : dont use any database, just download
 

@@ -113,7 +113,7 @@ public class ExhentaiParser {
         String[] tmp = getPassage(page, "<div id=\"gdf\" onclick=\"return pop_fav\\(\\)\">", "</a>").split(">");
         String fav = tmp[tmp.length-1];
 
-        if(!fav.equals(" Add to Favorites")){
+        if(!fav.equals(" Add to Favorites") && !Main.nodb){
             result.fav_id = Main.db.getFavId(fav) + "";
         }
 
