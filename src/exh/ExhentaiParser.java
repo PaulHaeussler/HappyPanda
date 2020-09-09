@@ -188,7 +188,7 @@ public class ExhentaiParser {
         result.file_type = tmp3[tmp3.length - 1];
 
 
-        String filePath = removeIllegal(Main.repositoryPath + "/" + removeIllegal(group.album_name) + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type);
+        String filePath = Main.repositoryPath + "/" + removeIllegal(group.album_name) + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
         File file = new File(filePath);
         if(!file.exists()){
             Printer.printToLog("Downloading image...", Printer.LOGTYPE.DEBUG);
