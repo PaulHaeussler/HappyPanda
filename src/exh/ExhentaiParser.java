@@ -210,6 +210,7 @@ public class ExhentaiParser {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 if(Utility.isQuotaExceeded(file)){
                     Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Use \u001B[0m \u001B[31m -startFrom " + group.ex_id, Printer.LOGTYPE.INFO);
+                    file.delete();
                     System.exit(-1);
                 }
             } catch (Exception e){

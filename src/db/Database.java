@@ -116,6 +116,7 @@ public class Database {
         }
     }
 
+
     public void runInsert(String cmd) {
         try {
             Printer.printToLog("Executing " + cmd, Printer.LOGTYPE.SQL);
