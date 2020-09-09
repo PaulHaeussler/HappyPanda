@@ -118,7 +118,7 @@ public class ExhentaiParser {
 
         String tmp = getPassage(page, "<div id=\"gdt\">", "<div class=\"c\"></div>");
 
-        String[] tmp1 = tmp.split("<div class=\"gdtl\" style=\"height:320px\"><a href=\"");
+        String[] tmp1 = tmp.split("<div class=\"gdtl\" style=\"height:+\\dpx\"><a href=\"");
         for(int i = 1; i < tmp1.length; i++){
             count.getAndIncrement();
             Printer.printToLog("Processing image " + count + "...", Printer.LOGTYPE.INFO);
