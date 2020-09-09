@@ -60,6 +60,9 @@ public class Utility {
                     case "-favs":
                         Main.getFavourites = true;
                         break;
+                    case "-getAlbum":
+                        Main.getAlbum = getNextIfExistent(args, i);
+                        break;
                     default:
                         break;
                 }
