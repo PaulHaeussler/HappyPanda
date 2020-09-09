@@ -69,6 +69,9 @@ public class Utility {
                     case "-getAlbum":
                         Main.getAlbum = getNextIfExistent(args, i);
                         break;
+                    case "-startFrom":
+                        Main.startFrom = getNextIfExistent(args, i);
+                        break;
                     default:
                         break;
                 }

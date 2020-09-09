@@ -16,9 +16,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExhentaiParser {
 
+    private static boolean skipping = false;
+
     public void getFavs() throws Exception {
         String page = Main.ec.getPage("https://exhentai.org/favorites.php");
 
+        String no = findNoOfPages(page);
+
+        if(!Main.startFrom.equals("")) skipping = true;
+
+        for(int i = 0; i < Integer.parseInt(no)-1; i++){
+            parseFavs(Main.ec.getPage("https://exhentai.org/favorites.php?page=" + i));
+        }
+    }
+
+    private void parseFavs(String page) throws Exception {
+        String[] tmp = getPassage(page, "<table class=\"itg gltc\">", "</table>").split("<td class=\"gl3c glname\" ");
+
+        for(int i = 1; i < tmp.length; i++){
+            String tmp1 = tmp[i].split("</td>")[0];
+            String url = getPassage(tmp1, "<a href=\"", "\">");
+            String exId = getPassage(url, "https://exhentai.org/g/", "/");
+            if(exId.equals(Main.startFrom)) skipping = false;
+            if(skipping) continue;
+            getAlbum(url);
+        }
+    }
+
+    private String findNoOfPages(String page){
+        //find no. of pages
+        String tmp = getPassage(page, "<table class=\"ptt\" style=\"margin:2px auto 0px\">", "</table>");
+        String[] tmp2 = tmp.split("<td onclick=\"document\\.location=this\\.firstChild\\.href\">");
+        String tmp3 = tmp2[tmp2.length - 2];
+        String[] tmp4 = tmp3.split("</a>")[0].split(">");
+        return tmp4[tmp4.length - 1];
     }
 
 
@@ -101,12 +132,7 @@ public class ExhentaiParser {
     private ArrayList<ExhentaiImage> extractImages(String page, String url, ExhentaiAlbum group) throws Exception {
         ArrayList<ExhentaiImage> result = new ArrayList<>();
 
-        //find no. of pages
-        String tmp = getPassage(page, "<table class=\"ptt\" style=\"margin:2px auto 0px\">", "</table>");
-        String[] tmp2 = tmp.split("<td onclick=\"document\\.location=this\\.firstChild\\.href\">");
-        String tmp3 = tmp2[tmp2.length - 2];
-        String[] tmp4 = tmp3.split("</a>")[0].split(">");
-        String no = tmp4[tmp4.length - 1];
+        String no = findNoOfPages(page);
 
         Printer.printToLog("Found " + no + " pages for this album", Printer.LOGTYPE.INFO);
         AtomicInteger c = new AtomicInteger(0);
@@ -161,7 +187,7 @@ public class ExhentaiParser {
                 FileOutputStream fos = new FileOutputStream(filePath);
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 if(Utility.isQuotaExceeded(file)){
-                    Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Terminating...", Printer.LOGTYPE.INFO);
+                    Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Use \u001B[0m \u001B[31m -startFrom " + group.ex_id, Printer.LOGTYPE.INFO);
                     System.exit(-1);
                 }
             } catch (Exception e){
