@@ -48,9 +48,13 @@ public class ExhentaiParser {
         //find no. of pages
         String tmp = getPassage(page, "<table class=\"ptt\" style=\"margin:2px auto 0px\">", "</table>");
         String[] tmp2 = tmp.split("<td onclick=\"document\\.location=this\\.firstChild\\.href\">");
-        String tmp3 = tmp2[tmp2.length - 2];
-        String[] tmp4 = tmp3.split("</a>")[0].split(">");
-        return tmp4[tmp4.length - 1];
+        if(tmp2.length <= 1){
+            return "1";
+        } else {
+            String tmp3 = tmp2[tmp2.length - 2];
+            String[] tmp4 = tmp3.split("</a>")[0].split(">");
+            return tmp4[tmp4.length - 1];
+        }
     }
 
 
@@ -109,8 +113,12 @@ public class ExhentaiParser {
             result.parent = parent;
         }
 
+        if(table[4].contains("<span")){
+            result.language = table[4].split("&nbsp;<span")[0];
+        } else {
+            result.language = table[4].split("&nbsp;</td>")[0];
+        }
 
-        result.language = table[4].split("&nbsp;</td>")[0];
         result.file_size = table[5].split("</td>")[0];
         result.length = table[6].split(" pages</td>")[0];
         result.favourited = table[6].split("<td class=\"gdt2\" id=\"favcount\">")[1].split(" times</td>")[0];
@@ -133,7 +141,7 @@ public class ExhentaiParser {
 
         File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
         if(Main.skipDir && dir.exists()) return null;
-        if(Main.skipCount && dir.listFiles().length == Integer.parseInt(result.length)) return null;
+        if(dir.exists()) if(Main.skipCount && dir.listFiles().length >= Integer.parseInt(result.length)) return null;
 
         if(!dir.exists()) dir.mkdir();
 
