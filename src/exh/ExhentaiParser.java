@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -75,6 +76,14 @@ public class ExhentaiParser {
         return result;
     }
 
+    private String removeIllegal(String str){
+        String illegal = "<>?\"|*:\\/";
+        for(char c : illegal.toCharArray()){
+            str = illegal.replace(c, ' ');
+        }
+        return str;
+    }
+
     private ExhentaiAlbum parseAlbum(String page, String url) throws Exception  {
         ExhentaiAlbum result = new ExhentaiAlbum();
 
@@ -121,7 +130,7 @@ public class ExhentaiParser {
 
         result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
-        File dir = new File(Main.repositoryPath + "/" + result.album_name + "_" + result.ex_id);
+        File dir = new File(removeIllegal(Main.repositoryPath + "/" + result.album_name + "_" + result.ex_id));
         if(!dir.exists()) dir.mkdir();
 
         result.images = extractImages(page, url, result);
@@ -175,10 +184,11 @@ public class ExhentaiParser {
         result.img_width = widthHeight.split(" x ")[0];
         result.img_height = widthHeight.split(" x ")[1];
         result.filesize = tmp2.split(" :: ")[2];
-        result.file_type = tmp2.split(" :: ")[0].split("\\.")[1];
+        String[] tmp3 = tmp2.split(" :: ")[0].split("\\.");
+        result.file_type = tmp3[tmp3.length - 1];
 
 
-        String filePath = Main.repositoryPath + "/" + group.album_name + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
+        String filePath = removeIllegal(Main.repositoryPath + "/" + group.album_name + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type);
         File file = new File(filePath);
         if(!file.exists()){
             Printer.printToLog("Downloading image...", Printer.LOGTYPE.DEBUG);
