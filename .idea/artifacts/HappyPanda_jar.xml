@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="HappyPanda:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/HappyPanda_jar</output-path>
+    <root id="archive" name="HappyPanda.jar">
+      <element id="module-output" name="HappyPanda" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/mysql-connector-java-5.0.7.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

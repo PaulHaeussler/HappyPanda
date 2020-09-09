@@ -89,12 +89,12 @@ public class ExhentaiParser {
         File dir = new File(Main.repositoryPath + "/" + result.album_name);
         if(!dir.exists()) dir.mkdir();
 
-        result.images = extractImages(page, url, result.album_name);
+        result.images = extractImages(page, url, result);
 
         return result;
     }
 
-    private ArrayList<ExhentaiImage> extractImages(String page, String url, String groupName) throws Exception {
+    private ArrayList<ExhentaiImage> extractImages(String page, String url, ExhentaiAlbum group) throws Exception {
         ArrayList<ExhentaiImage> result = new ArrayList<>();
 
         //find no. of pages
@@ -107,29 +107,29 @@ public class ExhentaiParser {
         Printer.printToLog("Found " + no + " pages for this album", Printer.LOGTYPE.INFO);
         AtomicInteger c = new AtomicInteger(0);
         for(int i = 0; i < Integer.parseInt(no); i++){
-            result.addAll(parseImages(Main.ec.getPage(url + "/?p=" + i), c, groupName));
+            result.addAll(parseImages(Main.ec.getPage(url + "/?p=" + i), c, group));
         }
 
         return result;
     }
 
-    private ArrayList<ExhentaiImage> parseImages(String page, AtomicInteger count, String groupName) throws Exception {
+    private ArrayList<ExhentaiImage> parseImages(String page, AtomicInteger count, ExhentaiAlbum group) throws Exception {
         ArrayList<ExhentaiImage> result = new ArrayList<>();
 
         String tmp = getPassage(page, "<div id=\"gdt\">", "<div class=\"c\"></div>");
 
-        String[] tmp1 = tmp.split("<div class=\"gdtl\" style=\"height:+\\dpx\"><a href=\"");
+        String[] tmp1 = tmp.split("<div class=\"gdtl\" style=\"height:\\d+px\"><a href=\"");
         for(int i = 1; i < tmp1.length; i++){
             count.getAndIncrement();
-            Printer.printToLog("Processing image " + count + "...", Printer.LOGTYPE.INFO);
+            Printer.printToLog("Processing image " + count + "/" + group.length + "...", Printer.LOGTYPE.INFO);
             String url = tmp1[i].split("\">")[0];
-            result.add(parseImagePage(url, count, groupName));
+            result.add(parseImagePage(url, count, group));
         }
 
         return result;
     }
 
-    private ExhentaiImage parseImagePage(String url, AtomicInteger count, String groupName) throws Exception {
+    private ExhentaiImage parseImagePage(String url, AtomicInteger count, ExhentaiAlbum group) throws Exception {
         ExhentaiImage result = new ExhentaiImage();
 
         result.ex_id = url.split("exhentai\\.org/s/")[1].split("/")[0];
@@ -149,7 +149,7 @@ public class ExhentaiParser {
 
         try{
             ReadableByteChannel rbc = Channels.newChannel(Main.ec.establishConnection(imgUrl).getInputStream());
-            String filePath = Main.repositoryPath + "/" + groupName + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
+            String filePath = Main.repositoryPath + "/" + group.album_name + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
             FileOutputStream fos = new FileOutputStream(filePath);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         } catch (Exception e){

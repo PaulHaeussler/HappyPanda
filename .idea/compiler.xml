@@ -2,7 +2,7 @@
 <project version="4">
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="HappyPanda" options="--add-exports=java.base/sun.net.www.protocol.https=ALL-UNNAMED" />
+      <module name="HappyPanda"/>
     </option>
   </component>
 </project>
