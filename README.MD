@@ -21,16 +21,18 @@ Static parameters are always preceded with a dash '-', whereas parameter values 
 -   -user : username to be used to sign on database, has to have full permissions on the schema specified.
 -   -pw : the password corresponding to the username
 -   -p : A path to the directory in which the images should be placed 
+-   -headers: path to the file containing your request headers, see sample_headers.txt
 
 ### Voluntary parameters:
 
 -   -getAlbum : downloads one specified album with all its metadata, full URL has to be specified
 -   -getFavs : downloads all your favorites, and maintains categories
 -   -startFrom [ex_id]: resume where you left of, in case quota got met
+-   -nodb : dont use any database, just download
 
 
 A sample program call could look like this:
 ```
-java -jar HappyPanda_V0.1.jar -host 127.0.0.1 -dbname happyPanda -user admin -pw 12345678 -p C:\hentai -getFavs
+java -jar HappyPanda_V0.1.jar -host 127.0.0.1 -dbname happyPanda -user admin -pw 12345678 -p C:\hentai -headers C:\headers.txt -getFavs
 ```
 
