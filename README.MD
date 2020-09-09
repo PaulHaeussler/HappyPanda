@@ -1,15 +1,15 @@
 # HappyPanda
-### A downloader for exhentai.org to download and archive your favourite hentai
+### A downloader for sadpanda to download and archive your favourite hentai
 
 This executable takes several arguments for startup to define its environment and runtime procedure.
 A mysql database has to be provided with its credentials (if concerned for security, a localhost database should work fine) 
 and a schema to use. This database will keep track of all albums and images, as well as all tags and metadata. 
 
-Also required is a text file containing what the program uses in its requests headers to exhentai. This is necessary in 
+Also required is a text file containing what the program uses in its requests headers to sadpanda. This is necessary in 
 order to appear as a normal browser. Entries are separated by five '=' as a delimiter. The only entry which usually requires
 changes is "cookie". Either read your cookie and replace the anonymized info, or open the developer tools in your browser,
-navigate to exhentai.org (provided you already have access with this browser) and check what headers your browser used.
-This is usually done on the network tab, you're interested in the results of the return of exhentai.org itself.
+navigate to sadpanda (provided you already have access with this browser) and check what headers your browser used.
+This is usually done on the network tab, you're interested in the results of the return of sadpanda itself.
 
 ## Program parameters:
 Static parameters are always preceded with a dash '-', whereas parameter values are not.

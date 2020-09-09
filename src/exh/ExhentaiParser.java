@@ -1,14 +1,191 @@
 package exh;
 
 import main.Main;
+import util.Printer;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExhentaiParser {
+
+    public void getFavs() throws Exception {
+        String page = Main.ec.getPage("https://exhentai.org/favorites.php");
+
+    }
 
 
     public void getAlbum(String url) throws Exception {
         String page = Main.ec.getPage(url);
 
+        ExhentaiAlbum ea = parseAlbum(page, url);
 
 
+        //TODO add data to db
+
+    }
+
+    public ArrayList<String> getEHFavs() throws Exception {
+        String page = Main.ec.getPage("https://exhentai.org/favorites.php");
+        ArrayList<String> result = new ArrayList<>();
+
+        String tmp = page.split("<div class=\"nosel\" style=\"position:relative; width:825px; margin:10px auto 5px\">")[1];
+        String tmp2 = tmp.split("<div class=\"fp fps\" onclick=\"document.location='https://exhentai.org/favorites.php'\" style=\"width:140px; padding:4px 0 0; margin:5px auto 0; text-align:center; font-weight:bold; position:relative; left:-8px\">Show All Favorites</div>")[0];
+        String[] tmp3 = tmp2.split("<div class=\"fp\" onclick=\"document.location='https://exhentai.org/favorites.php\\?favcat=");
+        for(int i = 1; i < tmp3.length; i++){
+            String tmp4 = tmp3[i].split("<div style=\"float:left; text-align:left; height:20px; padding:2px 0 0 3px\">")[1];
+            result.add(tmp4.split("</div>")[0]);
+        }
+        return result;
+    }
+
+    private ExhentaiAlbum parseAlbum(String page, String url) throws Exception  {
+        ExhentaiAlbum result = new ExhentaiAlbum();
+
+        String header = getPassage(page, "<div id" +
+                "=\"gd2\">", "</div>");
+        result.album_name = getPassage(header, "<h1 id=\"gn\">", "</h1>");
+        result.album_name_jp = getPassage(header, "<h1 id=\"gj\">", "</h1>");
+
+        String category = getPassage(page, "<div id=\"gdc\">", "</div>");
+        result.category = category.split(">")[1];
+
+        String uploader = getPassage(page, "<div id=\"gdn\">", "</a>");
+        result.uploader = uploader.split(">")[1];
+
+        String metadata = getPassage(page, "<div id=\"gdd\">", "</div>");
+        String[] table = metadata.split("<td class=\"gdt2\">");
+        result.posted = table[1].split("</td>")[0];
+        String parent = table[2].split("</td>")[0];
+        result.parent = parent.split(">")[1].split("<")[0];
+        result.language = table[4].split("\\&nbsp;</td>")[0];
+        result.file_size = table[5].split("</td>")[0];
+        result.length = table[6].split(" pages</td>")[0];
+        result.favourited = table[6].split("<td class=\"gdt2\" id=\"favcount\">")[1].split(" times</td>")[0];
+
+        String rating = getPassage(page, "<div id=\"gdr\" onmouseout=\"rating_reset\\(\\)\">", "</tbody>");
+        result.rating_total = getPassage(rating, "<span id=\"rating_count\">", "</span>");
+        result.rating_avg = getPassage(rating, "<td id=\"rating_label\" colspan=\"3\">Average: ", "</td>");
+
+        String[] tmp = getPassage(page, "<div id=\"gdf\" onclick=\"return pop_fav\\(\\)\">", "</a>").split(">");
+        String fav = tmp[tmp.length-1];
+
+        if(!fav.equals(" Add to Favorites")){
+            ResultSet rs = Main.db.runQuery("SELECT fav_id FROM " + Main.db_schema + ".favs WHERE fav_name='" + fav + "';");
+            rs.next();
+            result.fav_id = rs.getString(1);
+        }
+
+        result.ex_id = getPassage(url, "exhentai.org/g/", "/");
+
+        result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
+
+        File dir = new File(Main.repositoryPath + "/" + result.album_name);
+        if(!dir.exists()) dir.mkdir();
+
+        result.images = extractImages(page, url, result.album_name);
+
+        return result;
+    }
+
+    private ArrayList<ExhentaiImage> extractImages(String page, String url, String groupName) throws Exception {
+        ArrayList<ExhentaiImage> result = new ArrayList<>();
+
+        //find no. of pages
+        String tmp = getPassage(page, "<table class=\"ptt\" style=\"margin:2px auto 0px\">", "</table>");
+        String[] tmp2 = tmp.split("<td onclick=\"document\\.location=this\\.firstChild\\.href\">");
+        String tmp3 = tmp2[tmp2.length - 2];
+        String[] tmp4 = tmp3.split("</a>")[0].split(">");
+        String no = tmp4[tmp4.length - 1];
+
+        Printer.printToLog("Found " + no + " pages for this album", Printer.LOGTYPE.INFO);
+        AtomicInteger c = new AtomicInteger(0);
+        for(int i = 0; i < Integer.parseInt(no); i++){
+            result.addAll(parseImages(Main.ec.getPage(url + "/?p=" + i), c, groupName));
+        }
+
+        return result;
+    }
+
+    private ArrayList<ExhentaiImage> parseImages(String page, AtomicInteger count, String groupName) throws Exception {
+        ArrayList<ExhentaiImage> result = new ArrayList<>();
+
+        String tmp = getPassage(page, "<div id=\"gdt\">", "<div class=\"c\"></div>");
+
+        String[] tmp1 = tmp.split("<div class=\"gdtl\" style=\"height:320px\"><a href=\"");
+        for(int i = 1; i < tmp1.length; i++){
+            count.getAndIncrement();
+            Printer.printToLog("Processing image " + count + "...", Printer.LOGTYPE.INFO);
+            String url = tmp1[i].split("\">")[0];
+            result.add(parseImagePage(url, count, groupName));
+        }
+
+        return result;
+    }
+
+    private ExhentaiImage parseImagePage(String url, AtomicInteger count, String groupName) throws Exception {
+        ExhentaiImage result = new ExhentaiImage();
+
+        result.ex_id = url.split("exhentai\\.org/s/")[1].split("/")[0];
+        result.order_pos = String.format("%4s", count.toString()).replace(' ','0');
+        result.img_page = url;
+
+        String page = Main.ec.getPage(url);
+        String tmp = getPassage(page, "<div id=\"i3\">", "</a>");
+        String imgUrl = getPassage(tmp, "<img id=\"img\" src=\"", "\" style=\"");
+
+        String tmp2 = getPassage(page, "<div id=\"i4\"><div>", "</div>");
+        String widthHeight = tmp2.split(" :: ")[1];
+        result.img_width = widthHeight.split(" x ")[0];
+        result.img_height = widthHeight.split(" x ")[1];
+        result.filesize = tmp2.split(" :: ")[2];
+        result.file_type = tmp2.split(" :: ")[0].split("\\.")[1];
+
+        try{
+            ReadableByteChannel rbc = Channels.newChannel(Main.ec.establishConnection(imgUrl).getInputStream());
+            String filePath = Main.repositoryPath + "/" + groupName + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
+            FileOutputStream fos = new FileOutputStream(filePath);
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        } catch (Exception e){
+            Printer.printException(e);
+        }
+
+
+        return result;
+    }
+
+    private HashMap<String, String> extractTags(String taglist){
+        HashMap<String, String> result = new HashMap<>();
+        String[] tmp = taglist.split("<tr><td class=\"tc\">");
+        for(int i = 1; i < tmp.length; i++){
+            String val = tmp[i].split(":</td>")[0];
+
+            String[] tmp2 = tmp[i].split("</a>");
+            for(int j = 0; j < tmp2.length - 1; j++){
+                String[] tmp3 = tmp2[j].split(">");
+                result.put(tmp3[tmp3.length-1].replace(" ", "_"), val);
+            }
+        }
+        return result;
+    }
+
+    //patternStart has to be unique in the string
+    private String getPassage(String strToFilter, String patternStart, String patternEnd){
+        String[] tmp = strToFilter.split(patternStart);
+        if(tmp.length != 2) {
+            Printer.printError("Failed to parse correctly:\nStrToFilter: " + strToFilter + "\nPatternStart: " +
+                    patternStart + "\nPatternEnd: " + patternEnd);
+            System.exit(3);
+        }
+        String[] tmp1 = tmp[1].split(patternEnd);
+        String result = "";
+        if(tmp1.length > 0) result = tmp1[0];
+        return result;
     }
 }

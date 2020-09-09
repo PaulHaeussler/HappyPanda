@@ -1,6 +1,7 @@
 package main;
 
 import db.Database;
+import db.DatabaseSetup;
 import exh.ExhentaiConnection;
 import exh.ExhentaiParser;
 import util.Printer;
@@ -34,8 +35,11 @@ public class Main {
         try{
             db = new Database(db_user, db_pass, db_host, db_schema);
             ec = new ExhentaiConnection();
+            ep = new ExhentaiParser();
+            DatabaseSetup.checkSetup();
 
             if(!getAlbum.equals("")) ep.getAlbum(Main.getAlbum);
+            if(getFavourites) ep.getFavs();
 
         } catch (Exception e){
             e.printStackTrace();
