@@ -70,7 +70,7 @@ public class Printer {
             String msg ="[" + getTimeNow() + "] [" + logtype.toString() + "] " + msgToWrite + "\n";
             output.write(msg);
             output.flush();
-            if(logtype != LOGTYPE.SQL && logtype != LOGTYPE.DEBUG) System.out.println(msg);
+            System.out.println(msg);
         } catch (Exception e){
             e.printStackTrace();
             System.out.println("Fuck me this shouldnt happen");

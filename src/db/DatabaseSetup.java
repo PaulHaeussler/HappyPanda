@@ -89,11 +89,11 @@ public class DatabaseSetup {
     private static void createAlbumsTable(){
         Main.db.runInsert("CREATE TABLE " + Main.db_schema + ".`albums` (\n" +
                 "  `album_id` INT NOT NULL AUTO_INCREMENT,\n" +
-                "  `ex_id` INT NOT NULL,\n" +
+                "  `ex_id` VARCHAR(10) NOT NULL,\n" +
                 "  `album_name` VARCHAR(600) NOT NULL,\n" +
                 "  `album_name_jp` VARCHAR(600) NULL,\n" +
                 "  `posted` VARCHAR(20) NOT NULL,\n" +
-                "  `parent` INT NULL,\n" +
+                "  `parent` VARCHAR(10) NULL,\n" +
                 "  `language` VARCHAR(20) NOT NULL,\n" +
                 "  `file_size` VARCHAR(20) NOT NULL,\n" +
                 "  `length` INT NOT NULL,\n" +
@@ -139,7 +139,8 @@ public class DatabaseSetup {
         Main.db.runInsert("CREATE TABLE " + Main.db_schema + ".`favs` (\n" +
                 "  `fav_id` INT NOT NULL AUTO_INCREMENT,\n" +
                 "  `fav_name` VARCHAR(100) NOT NULL,\n" +
-                "  PRIMARY KEY (`fav_id`, `fav_name`))\n" +
+                "  PRIMARY KEY (`fav_id`, `fav_name`),\n" +
+                "  UNIQUE INDEX `fav_name_UNIQUE` (`fav_name` ASC))\n" +
                 "ENGINE = InnoDB\n" +
                 "DEFAULT CHARACTER SET = utf8mb4\n" +
                 "COLLATE = utf8mb4_unicode_ci;");

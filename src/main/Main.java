@@ -7,6 +7,7 @@ import exh.ExhentaiParser;
 import util.Printer;
 import util.Utility;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 

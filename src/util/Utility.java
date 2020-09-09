@@ -3,6 +3,8 @@ package util;
 import main.Main;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -19,6 +22,7 @@ public class Utility {
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
     public static HashMap<String, String> reqHeaders = new HashMap<>();
+    private static byte[] quota_exceeded = null;
 
     public static void checkStartupArgs(String[] args){
         if(args.length == 0) Printer.printToLog("No startup params given", Printer.LOGTYPE.INFO);
@@ -142,5 +146,14 @@ public class Utility {
         return new String(hexChars);
     }
 
+    public static boolean isQuotaExceeded(File file) throws Exception  {
+        byte[] f = Files.readAllBytes(Paths.get(file.getPath()));
 
+        if(quota_exceeded == null){
+            URL url = Utility.class.getClassLoader().getResource("util/quota_exceeded.gif");
+            File qf = new File(url.toURI());
+            quota_exceeded = Files.readAllBytes(Paths.get(qf.getPath()));
+        }
+        return Arrays.equals(quota_exceeded, f);
+    }
 }

@@ -2,6 +2,7 @@ package exh;
 
 import main.Main;
 import util.Printer;
+import util.Utility;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,9 +27,7 @@ public class ExhentaiParser {
 
         ExhentaiAlbum ea = parseAlbum(page, url);
 
-
-        //TODO add data to db
-
+        Main.db.addAlbum(ea);
     }
 
     public ArrayList<String> getEHFavs() throws Exception {
@@ -62,9 +61,16 @@ public class ExhentaiParser {
         String metadata = getPassage(page, "<div id=\"gdd\">", "</div>");
         String[] table = metadata.split("<td class=\"gdt2\">");
         result.posted = table[1].split("</td>")[0];
+
         String parent = table[2].split("</td>")[0];
-        result.parent = parent.split(">")[1].split("<")[0];
-        result.language = table[4].split("\\&nbsp;</td>")[0];
+        if(!parent.equals("None")){
+            result.parent = parent.split(">")[1].split("<")[0];
+        } else {
+            result.parent = parent;
+        }
+
+
+        result.language = table[4].split("&nbsp;</td>")[0];
         result.file_size = table[5].split("</td>")[0];
         result.length = table[6].split(" pages</td>")[0];
         result.favourited = table[6].split("<td class=\"gdt2\" id=\"favcount\">")[1].split(" times</td>")[0];
@@ -77,16 +83,14 @@ public class ExhentaiParser {
         String fav = tmp[tmp.length-1];
 
         if(!fav.equals(" Add to Favorites")){
-            ResultSet rs = Main.db.runQuery("SELECT fav_id FROM " + Main.db_schema + ".favs WHERE fav_name='" + fav + "';");
-            rs.next();
-            result.fav_id = rs.getString(1);
+            result.fav_id = Main.db.getFavId(fav) + "";
         }
 
         result.ex_id = getPassage(url, "exhentai.org/g/", "/");
 
         result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
-        File dir = new File(Main.repositoryPath + "/" + result.album_name);
+        File dir = new File(Main.repositoryPath + "/" + result.album_name + "_" + result.ex_id);
         if(!dir.exists()) dir.mkdir();
 
         result.images = extractImages(page, url, result);
@@ -147,15 +151,25 @@ public class ExhentaiParser {
         result.filesize = tmp2.split(" :: ")[2];
         result.file_type = tmp2.split(" :: ")[0].split("\\.")[1];
 
-        try{
-            ReadableByteChannel rbc = Channels.newChannel(Main.ec.establishConnection(imgUrl).getInputStream());
-            String filePath = Main.repositoryPath + "/" + group.album_name + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
-            FileOutputStream fos = new FileOutputStream(filePath);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-        } catch (Exception e){
-            Printer.printException(e);
-        }
 
+        String filePath = Main.repositoryPath + "/" + group.album_name + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
+        File file = new File(filePath);
+        if(!file.exists()){
+            Printer.printToLog("Downloading image...", Printer.LOGTYPE.DEBUG);
+            try{
+                ReadableByteChannel rbc = Channels.newChannel(Main.ec.establishConnection(imgUrl).getInputStream());
+                FileOutputStream fos = new FileOutputStream(filePath);
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                if(Utility.isQuotaExceeded(file)){
+                    Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Terminating...", Printer.LOGTYPE.INFO);
+                    System.exit(-1);
+                }
+            } catch (Exception e){
+                Printer.printException(e);
+            }
+        } else {
+            Printer.printToLog("Image already exists, skipping...", Printer.LOGTYPE.DEBUG);
+        }
 
         return result;
     }
