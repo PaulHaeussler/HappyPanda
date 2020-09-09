@@ -29,6 +29,8 @@ public class Main {
     public static boolean getFavourites = false;
     public static String getAlbum = "";
     public static String startFrom = "";
+    public static boolean skipDir = false;
+    public static boolean skipCount = false;
 
 
     public static void main(String[] args){

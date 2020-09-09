@@ -75,6 +75,12 @@ public class Utility {
                     case "-nodb":
                         Main.nodb = true;
                         break;
+                    case "-skipDir":
+                        Main.skipDir = true;
+                        break;
+                    case "-skipCount":
+                        Main.skipCount = true;
+                        break;
                     default:
                         break;
                 }

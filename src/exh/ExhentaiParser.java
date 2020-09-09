@@ -59,7 +59,7 @@ public class ExhentaiParser {
 
         ExhentaiAlbum ea = parseAlbum(page, url);
 
-        if(!Main.nodb) Main.db.addAlbum(ea);
+        if(!Main.nodb && ea != null) Main.db.addAlbum(ea);
     }
 
     public ArrayList<String> getEHFavs() throws Exception {
@@ -130,7 +130,11 @@ public class ExhentaiParser {
 
         result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
+
         File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
+        if(Main.skipDir && dir.exists()) return null;
+        if(Main.skipCount && dir.listFiles().length == Integer.parseInt(result.length)) return null;
+
         if(!dir.exists()) dir.mkdir();
 
         result.images = extractImages(page, url, result);
