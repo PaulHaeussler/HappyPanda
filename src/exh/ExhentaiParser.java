@@ -79,7 +79,7 @@ public class ExhentaiParser {
     private String removeIllegal(String str){
         String illegal = "<>?\"|*:\\/";
         for(char c : illegal.toCharArray()){
-            str = illegal.replace(c, ' ');
+            str = str.replace(c, ' ');
         }
         return str;
     }
@@ -130,7 +130,7 @@ public class ExhentaiParser {
 
         result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
-        File dir = new File(removeIllegal(Main.repositoryPath + "/" + result.album_name + "_" + result.ex_id));
+        File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
         if(!dir.exists()) dir.mkdir();
 
         result.images = extractImages(page, url, result);
@@ -188,7 +188,7 @@ public class ExhentaiParser {
         result.file_type = tmp3[tmp3.length - 1];
 
 
-        String filePath = removeIllegal(Main.repositoryPath + "/" + group.album_name + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type);
+        String filePath = removeIllegal(Main.repositoryPath + "/" + removeIllegal(group.album_name) + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type);
         File file = new File(filePath);
         if(!file.exists()){
             Printer.printToLog("Downloading image...", Printer.LOGTYPE.DEBUG);
