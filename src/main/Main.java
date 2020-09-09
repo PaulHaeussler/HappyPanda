@@ -22,6 +22,7 @@ public class Main {
     public static String db_pass;
     public static String db_host;
     public static String db_schema;
+    public static boolean nodb = false;
 
     public static HashMap<String, ArrayList<String>> cookies = new HashMap<>();
 
@@ -35,10 +36,10 @@ public class Main {
         Utility.checkStartupArgs(args);
         Utility.readReqHeaders();
         try{
-            db = new Database(db_user, db_pass, db_host, db_schema);
+            if(!nodb) db = new Database(db_user, db_pass, db_host, db_schema);
             ec = new ExhentaiConnection();
             ep = new ExhentaiParser();
-            DatabaseSetup.checkSetup();
+            if(!nodb) DatabaseSetup.checkSetup();
 
             if(!getAlbum.equals("")) ep.getAlbum(Main.getAlbum);
             if(getFavourites) ep.getFavs();

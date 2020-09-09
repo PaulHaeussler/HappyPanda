@@ -72,6 +72,9 @@ public class Utility {
                     case "-startFrom":
                         Main.startFrom = getNextIfExistent(args, i);
                         break;
+                    case "-nodb":
+                        Main.nodb = true;
+                        break;
                     default:
                         break;
                 }
@@ -83,6 +86,7 @@ public class Utility {
             Printer.printError("No repository path supplied!");
             System.exit(1);
         }
+        if(Main.nodb) return;
         if(Main.db_host == null || Main.db_pass == null ||Main.db_user == null || Main.db_schema == null){
             Printer.printError("Insufficient database information supplied!");
             System.exit(1);

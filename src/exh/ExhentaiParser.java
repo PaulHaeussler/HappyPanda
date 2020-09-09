@@ -58,7 +58,7 @@ public class ExhentaiParser {
 
         ExhentaiAlbum ea = parseAlbum(page, url);
 
-        Main.db.addAlbum(ea);
+        if(!Main.nodb) Main.db.addAlbum(ea);
     }
 
     public ArrayList<String> getEHFavs() throws Exception {
