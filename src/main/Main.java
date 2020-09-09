@@ -2,7 +2,6 @@ package main;
 
 import db.Database;
 import db.DatabaseSetup;
-import db.Stats;
 import exh.ExhentaiConnection;
 import exh.ExhentaiParser;
 import util.Printer;
