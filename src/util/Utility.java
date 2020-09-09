@@ -2,8 +2,10 @@ package util;
 
 import main.Main;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -150,9 +152,17 @@ public class Utility {
         byte[] f = Files.readAllBytes(Paths.get(file.getPath()));
 
         if(quota_exceeded == null){
-            URL url = Utility.class.getClassLoader().getResource("util/quota_exceeded.gif");
-            File qf = new File(url.toURI());
-            quota_exceeded = Files.readAllBytes(Paths.get(qf.getPath()));
+            InputStream is = Utility.class.getClassLoader().getResourceAsStream("util/quota_exceeded.gif");
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            int nRead;
+            byte[] data = new byte[16384];
+
+            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+
+            quota_exceeded =  buffer.toByteArray();
         }
         return Arrays.equals(quota_exceeded, f);
     }
