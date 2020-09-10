@@ -33,6 +33,6 @@ Static parameters are always preceded with a dash '-', whereas parameter values 
 
 A sample program call could look like this:
 ```
-java -jar HappyPanda_V0.1.jar -host 127.0.0.1 -dbname happyPanda -user admin -pw 12345678 -p C:\hentai -headers C:\headers.txt -getFavs
+java -jar HappyPanda_V0.1.jar -host 127.0.0.1 -dbname happyPanda -user admin -pw 12345678 -p C:\hentai -headers C:\headers.txt -favs
 ```
 
