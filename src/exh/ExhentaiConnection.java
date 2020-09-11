@@ -21,6 +21,7 @@ public class ExhentaiConnection {
     }
 
     public HttpsURLConnection establishConnection(String pageUrl) throws Exception {
+        Printer.printToLog("Establishing connection to " + pageUrl, Printer.LOGTYPE.DEBUG);
         TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509ExtendedTrustManager() {
                     @Override
@@ -85,7 +86,8 @@ public class ExhentaiConnection {
 
         Printer.printToLog("Page request " + url.toString() + " returned " + con.getResponseCode(), Printer.LOGTYPE.DEBUG);
         if(con.getResponseCode() != 200) {
-            Printer.printToLog("Request failed, request headers appear to be incorrect", Printer.LOGTYPE.ERROR);
+            if(con.getResponseCode() == 404) return null;
+            Printer.printError("Request failed, request headers appear to be incorrect");
             System.exit(4);
         }
         return con;
@@ -93,6 +95,7 @@ public class ExhentaiConnection {
 
     public String getPage(String pageUrl) throws Exception {
             HttpsURLConnection con = establishConnection(pageUrl);
+            if(con == null) return "";
             InputStream is = (InputStream) con.getContent();
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 

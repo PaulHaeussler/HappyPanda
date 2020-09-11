@@ -46,6 +46,7 @@ public class Main {
             if(!getAlbum.equals("")) ep.getAlbum(Main.getAlbum);
             if(getFavourites) ep.getFavs();
 
+            Printer.printToLog("Process exited with code 0", Printer.LOGTYPE.INFO);
         } catch (Exception e){
             e.printStackTrace();
             Printer.printException(e);

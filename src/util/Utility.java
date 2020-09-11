@@ -111,6 +111,7 @@ public class Utility {
                 }
             });
         } catch (Exception e){
+            Printer.printException(e);
             e.printStackTrace();
             System.exit(1);
         }
@@ -145,6 +146,7 @@ public class Utility {
             byte[] hashBytes = digest.digest(strToHash.getBytes(StandardCharsets.UTF_8));
             hash = bytesToHex(hashBytes);
         } catch (NoSuchAlgorithmException e) {
+            Printer.printException(e);
             e.printStackTrace();
             System.exit(1);
         }

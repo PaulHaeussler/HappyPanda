@@ -18,29 +18,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExhentaiParser {
 
     private static boolean skipping = false;
+    private static int counter = 0;
 
     public void getFavs() throws Exception {
         String page = Main.ec.getPage("https://exhentai.org/favorites.php");
 
         String no = findNoOfPages(page);
 
+        Printer.printToLog("\u001b[36m Found " + no + " pages of favorites! \u001b[0m", Printer.LOGTYPE.INFO);
+
+        counter = 1;
+
         if(!Main.startFrom.equals("")) skipping = true;
 
-        for(int i = 0; i < Integer.parseInt(no)-1; i++){
+        for(int i = 0; i < Integer.parseInt(no); i++){
             parseFavs(Main.ec.getPage("https://exhentai.org/favorites.php?page=" + i));
         }
+        Printer.printToLog("Finished processing all favorites, total albums processed: " + (counter - 1), Printer.LOGTYPE.INFO);
     }
 
     private void parseFavs(String page) throws Exception {
         String[] tmp = getPassage(page, "<table class=\"itg gltc\">", "</table>").split("<td class=\"gl3c glname\" ");
 
         for(int i = 1; i < tmp.length; i++){
+            Printer.printToLog("Processing album " + counter + " batch " + i + "/" + (tmp.length - 1), Printer.LOGTYPE.INFO);
+            counter++;
             String tmp1 = tmp[i].split("</td>")[0];
             String url = getPassage(tmp1, "<a href=\"", "\">");
             String exId = getPassage(url, "https://exhentai.org/g/", "/");
             if(exId.equals(Main.startFrom)) skipping = false;
             if(skipping) continue;
             getAlbum(url);
+            Printer.printToLog("Finished parsing fav page", Printer.LOGTYPE.INFO);
         }
     }
 
@@ -60,6 +69,10 @@ public class ExhentaiParser {
 
     public void getAlbum(String url) throws Exception {
         String page = Main.ec.getPage(url);
+        if(page.equals("")) {
+            Printer.printToLog("Received empty page, skipping...", Printer.LOGTYPE.WARNING);
+            return;
+        }
 
         ExhentaiAlbum ea = parseAlbum(page, url);
 
@@ -141,9 +154,15 @@ public class ExhentaiParser {
 
         File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
         if(Main.skipDir && dir.exists()) return null;
-        if(dir.exists()) if(Main.skipCount && dir.listFiles().length >= Integer.parseInt(result.length)) return null;
 
         if(!dir.exists()) dir.mkdir();
+        Printer.printToLog(dir.listFiles().length + " files in directory, expected " + result.length, Printer.LOGTYPE.INFO);
+        if(Main.skipCount && (dir.listFiles().length >= Integer.parseInt(result.length))) {
+            Printer.printToLog("Skipping", Printer.LOGTYPE.DEBUG);
+            return null;
+        } else {
+            Printer.printToLog("Entering", Printer.LOGTYPE.DEBUG);
+        }
 
         result.images = extractImages(page, url, result);
 
@@ -209,7 +228,7 @@ public class ExhentaiParser {
                 FileOutputStream fos = new FileOutputStream(filePath);
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
                 if(Utility.isQuotaExceeded(file)){
-                    Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Use \u001B[0m \u001B[31m -startFrom " + group.ex_id, Printer.LOGTYPE.INFO);
+                    Printer.printToLog("\033[1;32m Last downloaded image was  quota_exceeded img, please try downloading more at a later point in time. Use \u001B[0m \u001B[31m -startFrom \u001B[0m" + group.ex_id, Printer.LOGTYPE.INFO);
                     file.delete();
                     System.exit(-1);
                 }
