@@ -205,6 +205,8 @@ public class ExhentaiParser {
         String pattern = ".+_[0-9]+$";
         if(dir.getName().matches(pattern)){
             String newPath = Main.repositoryPath + "/" + removeIllegal(ea.album_name) + "_" + ea.ex_id + "_" + ea.ex_hash;
+            File npFile = new File(newPath);
+            if(npFile.exists()) npFile.delete();
             boolean success = dir.renameTo(new File(newPath));
             if(!success) Printer.printError("Failed to rename \n" + dir.getAbsolutePath() + "\n to \n" + newPath);
         }
