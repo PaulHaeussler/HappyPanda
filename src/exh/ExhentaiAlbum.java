@@ -7,6 +7,8 @@ public class ExhentaiAlbum {
 
     public String album_id;
     public String ex_id;
+    public String ex_hash;
+    public String album_url;
     public String album_name;
     public String album_name_jp;
     public String posted;

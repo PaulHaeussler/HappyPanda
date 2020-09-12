@@ -142,8 +142,10 @@ public class Database {
         if(ea.fav_id != null){
             fav_id = ea.fav_id;
         }
-        runInsertNoDuplicateError("INSERT INTO " + Main.db_schema + ".albums(ex_id, album_name, album_name_jp, posted, parent, language, file_size, length, favourited, rating_total, rating_avg, category, uploader, fav_id, added) VALUES ('" +
+        runInsertNoDuplicateError("INSERT INTO " + Main.db_schema + ".albums(ex_id, ex_hash, album_url, album_name, album_name_jp, posted, parent, language, file_size, length, favourited, rating_total, rating_avg, category, uploader, fav_id, added) VALUES ('" +
                 ea.ex_id + "', '" +
+                ea.ex_hash + "', '" +
+                ea.album_url + "', '" +
                 strIfNull(ea.album_name) + "', '" +
                 strIfNull(ea.album_name_jp) + "', '" +
                 ea.posted + "', '" +
@@ -162,8 +164,8 @@ public class Database {
         ResultSet rs = runQuery("SELECT album_id FROM " + Main.db_schema + ".albums WHERE ex_id='" + ea.ex_id + "';");
         rs.next();
         int albumId = rs.getInt("album_id");
-        addImages(ea.images);
-        linkImgs(ea.images, albumId);
+        if(!Main.checkAlbums) addImages(ea.images);
+        if(!Main.checkAlbums) linkImgs(ea.images, albumId);
         addTags(ea.tags, albumId);
     }
 
@@ -229,6 +231,25 @@ public class Database {
 
     private void addNewFav(String favName){
         runInsertNoDuplicateError("INSERT INTO " + Main.db_schema + ".favs(fav_name) VALUES('" + favName + "');");
+    }
+
+
+    public void runCheck(){
+        findMissingAlbums();
+        findMissingPictures();
+    }
+
+
+    private void findMissingAlbums(){
+
+    }
+
+    private void findMissingPictures(){
+
+    }
+
+    public void setStatus(String url, String status){
+        runInsert("UPDATE " + Main.db_schema + ".albums SET status='" + status + "' WHERE album_url='" + url + "';");
     }
 }
 

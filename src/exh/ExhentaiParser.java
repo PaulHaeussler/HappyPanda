@@ -71,6 +71,10 @@ public class ExhentaiParser {
         String page = Main.ec.getPage(url);
         if(page.equals("")) {
             Printer.printToLog("Received empty page, skipping...", Printer.LOGTYPE.WARNING);
+            if(Main.ec.lastResponse == 404) {
+                Printer.printToLog("Response for this album was 404, setting status to removed...", Printer.LOGTYPE.INFO);
+                Main.db.setStatus(url, "removed");
+            }
             return;
         }
 
@@ -98,11 +102,13 @@ public class ExhentaiParser {
         for(char c : illegal.toCharArray()){
             str = str.replace(c, ' ');
         }
+        if(str.length() > 100) str = str.substring(0, 100);
         return str;
     }
 
     private ExhentaiAlbum parseAlbum(String page, String url) throws Exception  {
         ExhentaiAlbum result = new ExhentaiAlbum();
+        result.album_url = url;
 
         String header = getPassage(page, "<div id" +
                 "=\"gd2\">", "</div>");
@@ -148,11 +154,24 @@ public class ExhentaiParser {
         }
 
         result.ex_id = getPassage(url, "exhentai.org/g/", "/");
+        String[] t = url.split("/");
+        if(t[t.length - 1].equals("")){
+            result.ex_hash = t[t.length - 2];
+        } else {
+            result.ex_hash = t[t.length - 1];
+        }
 
-        result.tags = extractTags(getPassage(page, "<div id=\"taglist\">", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
+
+        result.tags = extractTags(getPassage(page, "<div id=\"taglist\"", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
 
-        File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
+
+        File oldDir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
+        if(oldDir.exists()) upgradeDir(result, oldDir);
+
+
+
+        File dir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id + "_" + result.ex_hash);
         if(Main.skipDir && dir.exists()) return null;
 
         if(!dir.exists()) dir.mkdir();
@@ -164,9 +183,16 @@ public class ExhentaiParser {
             Printer.printToLog("Entering", Printer.LOGTYPE.DEBUG);
         }
 
-        result.images = extractImages(page, url, result);
+        if(!Main.checkAlbums) result.images = extractImages(page, url, result);
 
         return result;
+    }
+
+    private void upgradeDir(ExhentaiAlbum ea, File dir){
+        String pattern = ".+_[0-9]+$";
+        if(dir.getName().matches(pattern)){
+            dir.renameTo(new File(Main.repositoryPath + "/" + removeIllegal(ea.album_name) + "_" + ea.ex_id + "_" + ea.ex_hash));
+        }
     }
 
     private ArrayList<ExhentaiImage> extractImages(String page, String url, ExhentaiAlbum group) throws Exception {
@@ -219,7 +245,7 @@ public class ExhentaiParser {
         result.file_type = tmp3[tmp3.length - 1];
 
 
-        String filePath = Main.repositoryPath + "/" + removeIllegal(group.album_name) + "_" + group.ex_id + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
+        String filePath = Main.repositoryPath + "/" + removeIllegal(group.album_name) + "_" + group.ex_id + "_" + group.ex_hash + "/" + result.order_pos + "_" + result.ex_id + "." + result.file_type;
         File file = new File(filePath);
         if(!file.exists()){
             Printer.printToLog("Downloading image...", Printer.LOGTYPE.DEBUG);

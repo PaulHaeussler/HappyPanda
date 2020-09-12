@@ -16,6 +16,8 @@ import java.util.zip.GZIPInputStream;
 
 public class ExhentaiConnection {
 
+    public int lastResponse = 0;
+
     public ExhentaiConnection() throws Exception {
         getPage("https://exhentai.org");
     }
@@ -83,7 +85,7 @@ public class ExhentaiConnection {
         HttpsURLConnection con = (HttpsURLConnection)url.openConnection();
         setRequestProperties(con);
 
-
+        lastResponse = con.getResponseCode();
         Printer.printToLog("Page request " + url.toString() + " returned " + con.getResponseCode(), Printer.LOGTYPE.DEBUG);
         if(con.getResponseCode() != 200) {
             if(con.getResponseCode() == 404) return null;

@@ -81,6 +81,12 @@ public class Utility {
                     case "-skipCount":
                         Main.skipCount = true;
                         break;
+                    case "-dbRecheck":
+                        Main.dbRecheck = true;
+                        break;
+                    case "-checkAlbums":
+                        Main.checkAlbums = true;
+                        break;
                     default:
                         break;
                 }

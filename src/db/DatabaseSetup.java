@@ -90,6 +90,8 @@ public class DatabaseSetup {
         Main.db.runInsert("CREATE TABLE " + Main.db_schema + ".`albums` (\n" +
                 "  `album_id` INT NOT NULL AUTO_INCREMENT,\n" +
                 "  `ex_id` VARCHAR(10) NOT NULL,\n" +
+                "  `ex_hash` VARCHAR(10) NOT NULL,\n" +
+                "  `album_url` VARCHAR(600) NOT NULL,\n" +
                 "  `album_name` VARCHAR(600) NOT NULL,\n" +
                 "  `album_name_jp` VARCHAR(600) NULL,\n" +
                 "  `posted` VARCHAR(20) NOT NULL,\n" +
@@ -104,6 +106,7 @@ public class DatabaseSetup {
                 "  `category` VARCHAR(10) NOT NULL,\n" +
                 "  `uploader` VARCHAR(100) NOT NULL,\n" +
                 "  `fav_id` INT NULL,\n" +
+                "  `status` VARCHAR(50),\n" +
                 "  `added` VARCHAR(45) NOT NULL,\n" +
                 "  PRIMARY KEY (`album_id`, `ex_id`),\n" +
                 "  UNIQUE INDEX `album_id_UNIQUE` (`album_id` ASC),\n" +

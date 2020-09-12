@@ -31,6 +31,8 @@ public class Main {
     public static String startFrom = "";
     public static boolean skipDir = false;
     public static boolean skipCount = false;
+    public static boolean dbRecheck = false;
+    public static boolean checkAlbums = false;
 
 
     public static void main(String[] args){
@@ -45,6 +47,7 @@ public class Main {
 
             if(!getAlbum.equals("")) ep.getAlbum(Main.getAlbum);
             if(getFavourites) ep.getFavs();
+            if(dbRecheck) db.runCheck();
 
             Printer.printToLog("Process exited with code 0", Printer.LOGTYPE.INFO);
         } catch (Exception e){
