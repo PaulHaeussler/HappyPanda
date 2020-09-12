@@ -106,6 +106,14 @@ public class ExhentaiParser {
         return str;
     }
 
+    private String removeIllegalNoTrim(String str){
+        String illegal = "<>?\"|*:\\/";
+        for(char c : illegal.toCharArray()){
+            str = str.replace(c, ' ');
+        }
+        return str;
+    }
+
     private ExhentaiAlbum parseAlbum(String page, String url) throws Exception  {
         ExhentaiAlbum result = new ExhentaiAlbum();
         result.album_url = url;
@@ -165,6 +173,11 @@ public class ExhentaiParser {
         result.tags = extractTags(getPassage(page, "<div id=\"taglist\"", "<div id=\"tagmenu_act\" style=\"display:none\"></div>"));
 
 
+        File noTrim = new File(Main.repositoryPath + "/" + removeIllegalNoTrim(result.album_name) + "_" + result.ex_id);
+        if(noTrim.exists() && result.album_name.length() > 100){
+            upgradeDir(result, noTrim);
+        }
+
 
         File oldDir = new File(Main.repositoryPath + "/" + removeIllegal(result.album_name) + "_" + result.ex_id);
         if(oldDir.exists()) upgradeDir(result, oldDir);
@@ -191,7 +204,9 @@ public class ExhentaiParser {
     private void upgradeDir(ExhentaiAlbum ea, File dir){
         String pattern = ".+_[0-9]+$";
         if(dir.getName().matches(pattern)){
-            dir.renameTo(new File(Main.repositoryPath + "/" + removeIllegal(ea.album_name) + "_" + ea.ex_id + "_" + ea.ex_hash));
+            String newPath = Main.repositoryPath + "/" + removeIllegal(ea.album_name) + "_" + ea.ex_id + "_" + ea.ex_hash;
+            boolean success = dir.renameTo(new File(newPath));
+            if(!success) Printer.printError("Failed to rename \n" + dir.getAbsolutePath() + "\n to \n" + newPath);
         }
     }
 

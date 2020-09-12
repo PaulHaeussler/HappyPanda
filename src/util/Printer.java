@@ -78,7 +78,7 @@ public class Printer {
     }
 
     public static void printError(String errorMsg){
-        printToLog(errorMsg, LOGTYPE.ERROR);
+        printToLog("\u001b[31m" + errorMsg + "\u001b[0m", LOGTYPE.ERROR);
     }
 
     public static void printException(Exception e){
