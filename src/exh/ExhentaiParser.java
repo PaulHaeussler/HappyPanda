@@ -94,7 +94,7 @@ public class ExhentaiParser {
             Printer.printToLog("Received empty page, skipping...", Printer.LOGTYPE.WARNING);
             if(Main.ec.lastResponse == 404) {
                 Printer.printToLog("Response for this album was 404, setting status to removed...", Printer.LOGTYPE.INFO);
-                Main.db.setStatus(url, "removed");
+                if(!Main.nodb) Main.db.setStatus(url, "removed");
             }
             return;
         }
