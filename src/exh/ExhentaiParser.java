@@ -13,26 +13,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExhentaiParser {
 
     private static boolean skipping = false;
     private static int counter = 0;
+    private static int page_counter = 0;
 
     public void getFavs() throws Exception {
         String page = Main.ec.getPage("https://exhentai.org/favorites.php");
 
-        String no = findNoOfPages(page);
-
-        Printer.printToLog("\u001b[36m Found " + no + " pages of favorites! \u001b[0m", Printer.LOGTYPE.INFO);
+        Printer.printToLog("\u001b[36m Going through the favorites... \u001b[0m", Printer.LOGTYPE.INFO);
 
         counter = 1;
 
+        page_counter = 1;
+
         if(!Main.startFrom.equals("")) skipping = true;
 
-        for(int i = 0; i < Integer.parseInt(no); i++){
-            parseFavs(Main.ec.getPage("https://exhentai.org/favorites.php?page=" + i));
+        while(true){
+            Printer.printToLog("\u001b[36m Parsing page " + page_counter + " ... \u001b[0m", Printer.LOGTYPE.INFO);
+            parseFavs(page);
+            String nextPage = findNext(page);
+            if(Objects.equals(nextPage, "")){
+                break;
+            }
+            page = Main.ec.getPage(nextPage);
+            page_counter++;
         }
         Printer.printToLog("Finished processing all favorites, total albums processed: " + (counter - 1), Printer.LOGTYPE.INFO);
     }
@@ -66,6 +75,18 @@ public class ExhentaiParser {
         }
     }
 
+
+    private String findNext(String page){
+        String result = "";
+        try {
+            String tmp = getPassage(page, "<a id=\"unext\" href=\"", "\">Next ></a>");
+            result = tmp;
+        } catch (Exception ignored){
+
+        }
+
+        return result;
+    }
 
     public void getAlbum(String url) throws Exception {
         String page = Main.ec.getPage(url);

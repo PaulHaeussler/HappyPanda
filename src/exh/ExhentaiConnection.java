@@ -86,11 +86,14 @@ public class ExhentaiConnection {
         setRequestProperties(con);
 
         lastResponse = con.getResponseCode();
-        Printer.printToLog("Page request " + url.toString() + " returned " + con.getResponseCode(), Printer.LOGTYPE.DEBUG);
+
         if(con.getResponseCode() != 200) {
             if(con.getResponseCode() == 404) return null;
+            Printer.printToLog("Page request " + url.toString() + " returned \u001b[31;1m" + con.getResponseCode() + "\u001b[0m", Printer.LOGTYPE.DEBUG);
             Printer.printError("Request failed, request headers appear to be incorrect");
             System.exit(4);
+        } else {
+            Printer.printToLog("Page request " + url.toString() + " returned \u001b[32m" + con.getResponseCode() + "\u001b[0m", Printer.LOGTYPE.DEBUG);
         }
         return con;
     }
